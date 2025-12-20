@@ -22,6 +22,7 @@ export default function GeneratePage() {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [chatMode, setChatMode] = useState<"chat" | "write" | "edit">("chat");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +33,16 @@ export default function GeneratePage() {
   async function handleSend() {
     if (!input.trim() || isLoading) return;
 
+    // 모드에 따라 프롬프트 접두사 추가
+    let promptPrefix = "";
+    if (chatMode === "write") {
+      promptPrefix = "문서작성, ";
+    } else if (chatMode === "edit") {
+      promptPrefix = "문서수정 ";
+    }
+
+    const finalQuestion = promptPrefix + input.trim();
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -40,14 +51,13 @@ export default function GeneratePage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input.trim();
     setInput("");
     setIsLoading(true);
 
     try {
       const response = await sendChatMessage({
         workspaceId,
-        question: currentInput,
+        question: finalQuestion,
       });
 
       const assistantMessage: Message = {
@@ -184,25 +194,42 @@ export default function GeneratePage() {
         {/* Input Area */}
         <div className="border-t border-surface-border bg-surface-dark px-4 py-4 md:px-10">
           <div className="mx-auto max-w-4xl">
-            <div className="flex gap-3">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="문서나 용어에 대해 질문해보세요..."
-                disabled={isLoading}
-                className="flex-1 bg-surface-highlight border border-surface-border rounded-full px-6 py-3 text-sm text-white placeholder-text-dim/70 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
-              />
-              <button
-                onClick={handleSend}
-                disabled={isLoading || !input.trim()}
-                className="px-6 py-3 bg-primary rounded-full text-background-dark font-bold hover:bg-[#52ff9a] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-[20px]">
-                  send
-                </span>
-              </button>
+            <div className="flex flex-col gap-3">
+              {/* Mode Select */}
+              <div className="flex justify-end">
+                <select
+                  value={chatMode}
+                  onChange={(e) =>
+                    setChatMode(e.target.value as "chat" | "write" | "edit")
+                  }
+                  className="bg-surface-highlight border border-surface-border rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                >
+                  <option value="chat">채팅 모드</option>
+                  <option value="write">문서 작성 모드</option>
+                  <option value="edit">문서 수정 모드</option>
+                </select>
+              </div>
+              {/* Input */}
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="문서나 용어에 대해 질문해보세요..."
+                  disabled={isLoading}
+                  className="flex-1 bg-surface-highlight border border-surface-border rounded-full px-6 py-3 text-sm text-white placeholder-text-dim/70 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={isLoading || !input.trim()}
+                  className="px-6 py-3 bg-primary rounded-full text-background-dark font-bold hover:bg-[#52ff9a] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[20px]">
+                    send
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
