@@ -38,10 +38,11 @@ export async function POST(request: NextRequest) {
       })),
       failed: failed.length > 0 ? failed : undefined,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error parsing files:', error);
+    const errorMessage = error?.message || 'Failed to parse files';
     return NextResponse.json(
-      { error: 'Failed to parse files' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

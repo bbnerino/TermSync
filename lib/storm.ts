@@ -1,10 +1,22 @@
 /**
- * STORM Parse API Wrapper
- * Based on parser_refer.md documentation
+ * STORM API Wrapper
+ * New Storm API for file upload and parsing
  */
 
-const STORM_API_KEY = process.env.STORM_API_KEY!;
-const STORM_API_BASE_URL = 'https://storm-apis.sionic.im/parse-router/api/v2';
+const STORM_API_KEY = process.env.NEXT_PUBLIC_STORM_API_KEY || process.env.STORM_API_KEY || '';
+const STORM_API_BASE_URL = 'https://live-stargate.sionic.im/api/v2';
+const STORM_PARSE_API_BASE_URL = 'https://storm-apis.sionic.im/parse-router/api/v2';
+const BUCKET_ID = '7407360148281683969';
+
+export interface StormUploadResponse {
+  id?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  status?: string;
+  message?: string;
+  [key: string]: any;
+}
 
 interface ParseJobResponse {
   jobId: string;
@@ -23,17 +35,66 @@ interface ParseResultResponse {
 }
 
 /**
- * Upload file and start parsing job
+ * Upload file to Storm API
+ * https://sionic-storm-openapi.apidog.io/api-10588036
  */
-export async function uploadAndParse(file: File): Promise<{ jobId: string }> {
+export async function uploadFileToStorm(
+  file: File
+): Promise<StormUploadResponse> {
+  if (!STORM_API_KEY) {
+    throw new Error('Storm API 키가 설정되지 않았습니다.');
+  }
+
   const formData = new FormData();
+  formData.append('bucketId', BUCKET_ID);
   formData.append('file', file);
-  formData.append('language', 'ko'); // 한국어 문서
-  formData.append('deleteOriginFile', 'true'); // 원본 파일 삭제
 
   console.log(`[STORM] Uploading file: ${file.name} (${file.type})`);
 
-  const response = await fetch(`${STORM_API_BASE_URL}/parse/by-file`, {
+  const response = await fetch(
+    `${STORM_API_BASE_URL}/documents/by-file`,
+    {
+      method: 'POST',
+      headers: {
+        'storm-api-key': STORM_API_KEY,
+      },
+      body: formData,
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.message ||
+        `파일 업로드 실패: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  console.log('[STORM] Upload response:', data);
+  return data;
+}
+
+/**
+ * Upload file and start parsing job (legacy method - uses new upload API)
+ */
+export async function uploadAndParse(file: File): Promise<{ jobId: string; documentId?: string }> {
+  // First upload file using new API
+  const uploadResult = await uploadFileToStorm(file);
+  
+  if (!uploadResult.id) {
+    throw new Error('파일 업로드 후 ID를 받지 못했습니다.');
+  }
+
+  // Then start parsing using parse API
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('language', 'ko');
+  formData.append('deleteOriginFile', 'true');
+
+  console.log(`[STORM] Starting parse for document: ${uploadResult.id}`);
+
+  const response = await fetch(`${STORM_PARSE_API_BASE_URL}/parse/by-file`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${STORM_API_KEY}`,
@@ -43,12 +104,12 @@ export async function uploadAndParse(file: File): Promise<{ jobId: string }> {
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('[STORM] Upload failed:', response.status, error);
+    console.error('[STORM] Parse start failed:', response.status, error);
     throw new Error(`STORM Parse API Error: ${response.status} - ${error}`);
   }
 
   const data: ParseJobResponse = await response.json();
-  console.log('[STORM] Upload response:', data);
+  console.log('[STORM] Parse job started:', data);
   
   if (!data.jobId) {
     throw new Error('No jobId returned from STORM API');
@@ -58,7 +119,7 @@ export async function uploadAndParse(file: File): Promise<{ jobId: string }> {
     throw new Error(data.message || 'Parse job failed');
   }
 
-  return { jobId: data.jobId };
+  return { jobId: data.jobId, documentId: uploadResult.id };
 }
 
 /**
@@ -68,16 +129,25 @@ export async function uploadAndParseBuffer(
   buffer: Buffer,
   filename: string,
   mimeType: string
-): Promise<{ jobId: string }> {
-  const formData = new FormData();
+): Promise<{ jobId: string; documentId?: string }> {
+  // First upload file using new API
   const blob = new Blob([buffer], { type: mimeType });
+  const file = new File([blob], filename, { type: mimeType });
+  const uploadResult = await uploadFileToStorm(file);
+  
+  if (!uploadResult.id) {
+    throw new Error('파일 업로드 후 ID를 받지 못했습니다.');
+  }
+
+  // Then start parsing using parse API
+  const formData = new FormData();
   formData.append('file', blob, filename);
   formData.append('language', 'ko');
   formData.append('deleteOriginFile', 'true');
 
-  console.log(`[STORM] Uploading buffer: ${filename} (${mimeType})`);
+  console.log(`[STORM] Starting parse for buffer: ${filename} (${mimeType})`);
 
-  const response = await fetch(`${STORM_API_BASE_URL}/parse/by-file`, {
+  const response = await fetch(`${STORM_PARSE_API_BASE_URL}/parse/by-file`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${STORM_API_KEY}`,
@@ -87,12 +157,12 @@ export async function uploadAndParseBuffer(
 
   if (!response.ok) {
     const error = await response.text();
-    console.error('[STORM] Upload failed:', response.status, error);
+    console.error('[STORM] Parse start failed:', response.status, error);
     throw new Error(`STORM Parse API Error: ${response.status} - ${error}`);
   }
 
   const data: ParseJobResponse = await response.json();
-  console.log('[STORM] Upload response:', data);
+  console.log('[STORM] Parse job started:', data);
   
   if (!data.jobId) {
     throw new Error('No jobId returned from STORM API');
@@ -102,14 +172,14 @@ export async function uploadAndParseBuffer(
     throw new Error(data.message || 'Parse job failed');
   }
 
-  return { jobId: data.jobId };
+  return { jobId: data.jobId, documentId: uploadResult.id };
 }
 
 /**
  * Check parse job status
  */
 export async function getParseStatus(jobId: string): Promise<ParseResultResponse> {
-  const response = await fetch(`${STORM_API_BASE_URL}/parse/job/${jobId}`, {
+  const response = await fetch(`${STORM_PARSE_API_BASE_URL}/parse/job/${jobId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${STORM_API_KEY}`,
