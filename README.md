@@ -1,122 +1,153 @@
-# TermSync - AI 기술 문서 용어 통일
+# TermSync - AI 기반 기술 문서 용어 통일 플랫폼
 
-AI 기반으로 기술 문서의 용어를 자동으로 분석하고 통일하는 웹 애플리케이션입니다.
+![TermSync Banner](./image/image-1.png)
 
-## 🎉 구현 완료 상태
+## 📖 서비스 소개
 
-### ✅ Phase 1: 프로젝트 초기 설정 (완료)
-- Next.js 14 + TypeScript 설정
-- Tailwind CSS 커스텀 디자인 시스템
-- Material Symbols 아이콘 통합
-- 글로벌 스타일 및 애니메이션
+**TermSync**는 AI 기반으로 기술 문서의 용어를 자동으로 분석하고 통일하는 웹 애플리케이션입니다.
 
-### ✅ Phase 2: 핵심 라이브러리 (완료)
-- **JSON Database** (`lib/db/json-db.ts`)
-  - 워크스페이스, 문서, 용어 CRUD
-  - 검색 및 필터링
-  - 배치 작업 지원
+여러 문서에 산재된 용어를 AI가 자동으로 분석하여 표준 용어로 일관되게 통일해주며, 문서 작성 및 수정을 위한 챗봇 기능을 제공합니다. **Storm API**를 활용하여 문서 파싱, 워크스페이스 관리, RAG 기반 챗봇 기능을 구현했습니다.
 
-- **STORM Parse SDK** (`lib/storm.ts`)
-  - PDF/DOCX 파일 파싱
-  - Job 폴링 및 결과 반환
-  - 다중 파일 병렬 처리
+### 핵심 가치
 
-- **OpenAI SDK** (`lib/openai.ts`)
+- ⚡ **빠른 분석**: 대량의 문서도 수 초 내에 스캔하여 용어 불일치를 찾아냅니다
+- 📄 **다양한 형식**: PDF, DOCX 등 현업에서 사용하는 모든 기술 문서 포맷을 지원합니다
+- 🎯 **정확한 통일**: 단순 매칭이 아닌 문맥을 이해하는 AI가 가장 적합한 표준 용어를 제안합니다
+- 🤖 **AI 챗봇**: 문서 기반 질의응답 및 문서 작성/수정 모드를 지원합니다
+
+---
+
+## 🖼️ 주요 화면
+
+### 1. 랜딩 페이지
+
+![Landing Page](./image/image-1.png)
+
+서비스 소개와 주요 기능을 한눈에 볼 수 있는 랜딩 페이지입니다.
+
+### 2. 워크스페이스 선택
+
+![Workspace Selection](./image/image-2.png)
+
+프로젝트별로 워크스페이스를 생성하고 관리할 수 있습니다. Storm API를 통해 워크스페이스(Bucket)를 생성하고 조회합니다.
+
+### 3. 모드 선택
+
+![Mode Selection](./image/image-3.png)
+
+작업 목적에 맞는 모드를 선택합니다:
+
+- **용어 통일 모드**: 기존 문서의 용어를 분석하고 통일
+- **자동 문서/용어 생성 모드**: AI 기반 문서 작성 및 챗봇
+
+### 4. 용어 통일 모드 - 문서 업로드
+
+![Document Upload](./image/image-4.png)
+
+PDF, DOCX 파일을 드래그 앤 드롭으로 업로드합니다. Storm Parse API를 사용하여 문서를 파싱하고 텍스트를 추출합니다.
+
+### 5. 문서 DB 챗봇
+
+![Chat Interface](./image/image-5.png)
+
+워크스페이스의 문서를 기반으로 질의응답을 제공하는 챗봇입니다. Storm API의 RAG 기능을 활용하여 문서 검색 및 답변을 생성합니다.
+
+---
+
+## 🚀 주요 기능
+
+### 1. 용어 통일 모드
+
+여러 기술 문서에 산재된 용어를 자동으로 분석하고 통일합니다.
+
+1. **문서 업로드**: PDF/DOCX 파일 업로드 (최대 5개)
+2. **AI 분석**: Storm Parse API로 문서 파싱 → OpenAI로 용어 분석
+3. **용어 검토**: AI가 제안한 용어 그룹 검토 및 선택
+4. **적용**: 선택한 용어로 문서 일괄 변경
+5. **결과**: 통일된 문서 다운로드 및 DB 저장
+
+### 2. 문서 작성/수정 모드
+
+AI 챗봇을 통해 문서를 작성하거나 수정합니다.
+
+- **채팅 모드**: 일반적인 질의응답
+- **문서 작성 모드**: 새 문서 작성 지원
+- **문서 수정 모드**: 기존 문서 수정 지원
+
+Storm API의 RAG 기능을 활용하여 워크스페이스 내 문서를 기반으로 답변을 생성합니다.
+
+### 3. 워크스페이스 관리
+
+프로젝트별로 워크스페이스를 생성하고 관리합니다.
+
+- 워크스페이스 생성 및 조회 (Storm API)
+- 문서 관리
+- 용어 관리
+
+---
+
+## 🛠 기술 스택
+
+### Frontend
+
+- **Next.js 14** (App Router)
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Zustand** (상태 관리)
+- **Material Symbols** (아이콘)
+
+### Backend & APIs
+
+- **Storm API** (Sionic)
+  - 문서 파싱: `https://storm-apis.sionic.im/parse-router/api/v2`
+  - 워크스페이스 관리: `https://live-stargate.sionic.im/api/v2/buckets`
+  - 챗봇 (RAG): `https://live-stargate.sionic.im/api/v2/answer`
+- **OpenAI API** (GPT-4)
   - 용어 분석 및 그룹화
-  - UI 가이드 자동 생성
-  - 용어 추천
-  - 문서 검색 챗봇
-  - 통계 분석
+  - 문서 생성 지원
 
-- **Zustand 스토어**
-  - `unifyStore` - 용어 통일 모드
-  - `generateStore` - 자동 생성 모드
-  - `chatStore` - 챗봇
-  - `workspaceStore` - 워크스페이스 관리
+### Database
 
-- **API Routes**
-  - `/api/workspaces` - 워크스페이스 관리
-  - `/api/unify/parse` - 파일 파싱
-  - `/api/unify/analyze` - 용어 분석
-  - `/api/unify/apply` - 용어 적용
-  - `/api/generate/guide` - 가이드 생성
-  - `/api/chat` - 챗봇
+- JSON 파일 기반 (로컬 스토리지)
 
-### ✅ Phase 3: 페이지 구현 (진행 중)
+---
 
-#### 완성된 페이지:
-1. **랜딩 페이지** (`/`)
-   - Hero 섹션
-   - 주요 기능 소개
-   - CTA 버튼
-   - Footer
-
-2. **워크스페이스 선택** (`/workspace`)
-   - 워크스페이스 목록 (카드 그리드)
-   - 검색 기능
-   - 새 워크스페이스 생성 모달
-   - 빈 상태 UI
-
-3. **모드 선택** (`/workspace/[id]`)
-   - 용어 통일 모드 카드
-   - 자동 생성 모드 카드
-   - 각 모드 설명 및 기능 소개
-
-4. **용어 통일 모드** (완료 ✅)
-   - **파일 업로드** (`/workspace/[id]/unify`)
-     - 드래그 & 드롭 지원
-     - PDF, DOCX 파일 지원 (최대 5개)
-     - 파일 미리보기
-
-   - **분석 진행** (`/workspace/[id]/unify/analyze`)
-     - 실시간 진행 상황 (파싱 → 추출 → 그룹화 → AI 분석)
-     - 프로그레스 바
-     - 단계별 타임라인
-     - 문서 정보 카드
-
-   - **용어 검토** (`/workspace/[id]/unify/review`)
-     - 용어 그룹 리스트
-     - 체크박스 선택
-     - 검색 및 정렬 (신뢰도/빈도)
-     - 통계 대시보드
-     - 신뢰도 배지 (높음/중간/낮음)
-
-   - **최종 확인** (`/workspace/[id]/unify/confirm`)
-     - 적용 요약
-     - 선택된 용어 목록
-     - 최종 적용 버튼
-
-#### 완성! 🎉
-모든 주요 기능이 구현되었습니다!
-
-## 🚀 시작하기
+## 📦 설치 및 실행
 
 ### 1. 의존성 설치
-\`\`\`bash
+
+```bash
 npm install
-\`\`\`
+```
 
 ### 2. 환경 변수 설정
-`.env.local` 파일을 생성하고 API 키를 입력하세요:
 
-\`\`\`env
-# STORM Parse API
-STORM_API_KEY=your_storm_api_key_here
+`.env.local` 파일을 생성하고 다음 환경 변수를 설정하세요:
+
+```env
+# Storm API
+NEXT_PUBLIC_STORM_API_KEY=your_storm_api_key_here
+NEXT_PUBLIC_PARSE_STORM_API_KEY=your_parse_storm_api_key_here
+NEXT_PUBLIC_AGENT_ID=7408016797648121856
 
 # OpenAI API
 OPENAI_API_KEY=your_openai_api_key_here
-\`\`\`
+```
 
 ### 3. 개발 서버 실행
-\`\`\`bash
+
+```bash
 npm run dev
-\`\`\`
+```
 
 브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어주세요.
 
+---
+
 ## 📁 프로젝트 구조
 
-\`\`\`
+```
 termsync/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API Routes
@@ -127,16 +158,19 @@ termsync/
 │   ├── workspace/            # 워크스페이스 페이지
 │   │   └── [id]/             # 동적 라우트
 │   │       ├── unify/        # 용어 통일 모드
-│   │       ├── generate/     # 자동 생성 모드
+│   │       ├── generate/     # 자동 생성 모드 (챗봇)
 │   │       └── chat/         # 챗봇
 │   ├── layout.tsx            # 루트 레이아웃
 │   ├── page.tsx              # 랜딩 페이지
 │   └── globals.css           # 글로벌 스타일
+├── api/                      # 클라이언트 사이드 API
+│   ├── file-parse.api.ts    # Storm Parse API 클라이언트
+│   ├── workspace.api.ts      # 워크스페이스 API 클라이언트
+│   └── chat.api.ts           # 챗봇 API 클라이언트
 ├── lib/                      # 라이브러리
 │   ├── db/                   # Database
 │   │   └── json-db.ts        # JSON DB 구현
-│   ├── storm.ts              # STORM Parse SDK
-│   └── openai.ts             # OpenAI SDK
+│   └── storm.ts              # Storm API 유틸리티
 ├── store/                    # Zustand 스토어
 │   ├── unifyStore.ts         # 용어 통일
 │   ├── generateStore.ts      # 자동 생성
@@ -152,14 +186,93 @@ termsync/
 │   ├── workspaces.json
 │   ├── documents.json
 │   └── terms.json
-├── styles/                   # 스타일
-│   └── globals.css
-└── public/                   # 정적 파일
-\`\`\`
+└── image/                    # 스크린샷 이미지
+    ├── image-1.png
+    ├── image-2.png
+    ├── image-3.png
+    ├── image-4.png
+    └── image-5.png
+```
+
+---
+
+## 🔌 Storm API 연동
+
+TermSync는 **Storm API**를 핵심 인프라로 사용합니다.
+
+### 사용 중인 Storm API 엔드포인트
+
+1. **문서 파싱**
+
+   - 엔드포인트: `https://storm-apis.sionic.im/parse-router/api/v2/parse/by-file`
+   - 기능: PDF/DOCX 파일을 업로드하고 텍스트로 파싱
+   - 클라이언트: `api/file-parse.api.ts`
+
+2. **워크스페이스 관리**
+
+   - 조회: `GET https://live-stargate.sionic.im/api/v2/buckets?agentId&page&size`
+   - 생성: `POST https://live-stargate.sionic.im/api/v2/buckets`
+   - 클라이언트: `api/workspace.api.ts`
+
+3. **RAG 기반 챗봇**
+   - 엔드포인트: `POST https://live-stargate.sionic.im/api/v2/answer`
+   - 기능: 워크스페이스 내 문서를 기반으로 질의응답
+   - 클라이언트: `api/chat.api.ts`
+
+### Storm API 인증
+
+모든 Storm API 요청에는 `storm-api-key` 헤더가 필요합니다:
+
+```typescript
+headers: {
+  "storm-api-key": process.env.NEXT_PUBLIC_STORM_API_KEY,
+}
+```
+
+---
+
+## 🏗️ 시스템 아키텍처
+
+### AI 챗봇 에이전트 플로우
+
+TermSync의 챗봇은 사용자의 질문 의도를 파악하고, 적절한 에이전트로 라우팅하여 답변을 생성합니다.
+
+![Agent Flow](./image/image.png)
+
+#### 처리 프로세스
+
+1. **의도 파악 (Intent Identification)**
+
+   - 사용자 질문의 의도를 분석합니다
+   - 지원하는 의도:
+     - **문서 작성**: 새로운 문서 생성 요청
+     - **문서 수정**: 기존 문서 수정 요청
+     - **일반 질문**: 일반적인 질의응답
+
+2. **검색 단계 (Search/RAG)**
+
+   - 모든 의도에 대해 먼저 검색을 수행합니다
+   - 워크스페이스 내 문서를 검색하여 관련 컨텍스트를 수집합니다
+   - Storm API의 RAG 기능을 활용합니다
+
+3. **전문 에이전트 라우팅**
+
+   - 의도에 따라 적절한 LLM 에이전트로 라우팅됩니다:
+     - **문서 작성 프롬프트**: 문서 작성 전용 프롬프트로 처리
+     - **문서 수정 에이전트**: 문서 수정 전용 에이전트로 처리
+     - **일반 질문**: 일반 챗봇 모드로 처리
+
+4. **응답 생성**
+   - 각 에이전트가 검색된 컨텍스트를 바탕으로 최종 답변을 생성합니다
+
+이 아키텍처를 통해 사용자의 의도에 맞는 정확하고 맥락에 맞는 답변을 제공할 수 있습니다.
+
+---
 
 ## 🎨 디자인 시스템
 
 ### 색상
+
 - **Primary**: `#2bee79` (Neon Green)
 - **Background Dark**: `#102217`
 - **Surface Dark**: `#162e21`
@@ -167,137 +280,68 @@ termsync/
 - **Text Dim**: `#92c9a8`
 
 ### 폰트
+
 - **Display**: Spline Sans
 - **Body**: Noto Sans KR
 - **Icons**: Material Symbols Outlined
 
-### 애니메이션
-- `animate-fade-in`
-- `animate-fade-in-up`
-- `animate-pulse-glow`
-- 호버 효과 및 트랜지션
+---
 
-## 🔑 주요 기능
+## 📝 사용 예시
 
-### 1. 용어 통일 모드
-1. **파일 업로드**: PDF/DOCX 문서 업로드 (최대 5개)
-2. **AI 분석**: STORM Parse로 문서 파싱 → OpenAI로 용어 분석
-3. **용어 검토**: AI가 제안한 용어 그룹 검토 및 선택
-4. **적용**: 선택한 용어로 문서 일괄 변경
-5. **결과**: 통일된 문서 다운로드 및 DB 저장
+### 용어 통일 모드
 
-### 2. 자동 생성 모드 (완료 ✅)
-1. **이미지 업로드**: UI 스크린샷 드래그 & 드롭
-2. **AI 분석**: UI 요소 자동 추출
-3. **가이드 생성**: AI 기반 문서 자동 작성
-4. **용어 추천**: 표준 용어 추천 및 선택
-5. **편집**: 실시간 편집 및 미리보기
-6. **다운로드**: Markdown 형식 다운로드
+1. 워크스페이스 선택 또는 생성
+2. "용어 통일 모드" 선택
+3. PDF/DOCX 파일 업로드 (최대 5개)
+4. "분석 시작" 클릭
+5. Storm Parse API로 문서 파싱
+6. OpenAI로 용어 분석 및 그룹화
+7. 용어 검토 및 선택
+8. 통일된 문서 다운로드
 
-### 3. 챗봇 (완료 ✅)
-- **문서 검색**: RAG 기반 질의응답
-- **통계 분석**: 용어 사용 패턴 분석
-- **대화형 UI**: 실시간 채팅 인터페이스
-- **Quick Actions**: 자주 사용하는 질문 바로가기
-- **소스 표시**: 답변 출처 명시
+### 문서 작성/수정 모드
 
-## 🛠 기술 스택
+1. 워크스페이스에서 "자동 문서/용어 생성 모드" 선택
+2. 모드 선택 (채팅/문서 작성/문서 수정)
+3. 질문 입력
+4. Storm API RAG 기능으로 문서 기반 답변 생성
+5. 결과 확인 및 활용
 
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS, Material Symbols
-- **State Management**: Zustand
-- **AI/ML**: OpenAI GPT-4, STORM Parse API
-- **Database**: JSON File-based (Mock)
-- **Icons**: Material Symbols Outlined
+---
 
-## 📝 API 문서
+## 🔧 개발 가이드
 
-### 워크스페이스 API
-- `GET /api/workspaces` - 모든 워크스페이스 조회
-- `POST /api/workspaces` - 새 워크스페이스 생성
-- `GET /api/workspaces/[id]` - 특정 워크스페이스 조회
-- `PATCH /api/workspaces/[id]` - 워크스페이스 수정
-- `DELETE /api/workspaces/[id]` - 워크스페이스 삭제
+### 빌드
 
-### 용어 통일 API
-- `POST /api/unify/parse` - 파일 파싱
-- `POST /api/unify/analyze` - 용어 분석
-- `POST /api/unify/apply` - 용어 적용
-
-### 자동 생성 API
-- `POST /api/generate/guide` - UI 가이드 생성
-
-### 챗봇 API
-- `POST /api/chat` - 챗봇 질의응답
-
-## 📊 현재 진행 상황
-
-- ✅ Phase 1: 프로젝트 초기 설정 (100%)
-- ✅ Phase 2: 핵심 라이브러리 (100%)
-- ✅ Phase 3: 페이지 구현 (100%)
-  - ✅ 랜딩 페이지
-  - ✅ 워크스페이스 관리
-  - ✅ 용어 통일 모드
-  - ✅ 자동 생성 모드
-  - ✅ 챗봇
-
-## 🎯 완성된 기능
-
-### ✅ 모든 주요 기능 구현 완료!
-
-1. **워크스페이스 관리** - 생성, 선택, 관리
-2. **용어 통일 모드** - 파일 업로드 → 분석 → 검토 → 적용
-3. **자동 생성 모드** - 이미지 업로드 → AI 생성 → 편집 → 다운로드
-4. **챗봇** - 문서 검색 + 통계 분석
-
-### 🔧 추가 개선 가능 항목 (Optional)
-
-1. 에러 핸들링 강화
-2. 로딩 상태 최적화
-3. 반응형 디자인 개선
-4. E2E 테스트 추가
-5. ~~실제 API 연동 (STORM, OpenAI)~~ ✅ **완료!**
-6. 사용자 인증 시스템
-
-## 🧪 테스트 방법
-
-### 환경 설정
-1. `.env.local` 파일 생성:
-```env
-STORM_API_KEY=your-storm-api-key
-OPENAI_API_KEY=your-openai-api-key
-```
-
-2. 개발 서버 시작:
 ```bash
-npm run dev
+npm run build
 ```
 
-### 용어 통일 모드 테스트
-1. `http://localhost:3000/workspace`로 이동
-2. 워크스페이스 선택 또는 생성
-3. "용어 통일 모드" 클릭
-4. 파일 업로드 (테스트용 `test-document.txt` 사용 가능)
-5. **중요**: 파일을 선택하면 "분석 시작" 버튼이 활성화됩니다
-6. 버튼 클릭 → STORM Parse API + OpenAI 분석 실행
-7. 브라우저 콘솔(F12)에서 `[TermSync]` 로그 확인
+### 프로덕션 실행
 
-### 자동 생성 모드 테스트
-1. 워크스페이스에서 "자동 생성 모드" 클릭
-2. UI 가이드 작성 또는 용어 추천 선택
-3. 이미지 파일(PNG/JPG) 업로드
-4. 생성 버튼 클릭 → STORM + OpenAI 실행
+```bash
+npm start
+```
 
-### 챗봇 테스트
-1. 자동 생성 모드 화면에서 우측 사이드바 사용
-2. 질문 입력 → OpenAI API로 문서 검색
+### 타입 체크
 
-### 디버깅
-- 브라우저 콘솔(F12)을 열고 `[TermSync]` 로그 확인
-- API 에러는 alert와 콘솔에 표시됩니다
-- 네트워크 탭에서 API 호출 상태 확인
+```bash
+npm run type-check
+```
+
+---
 
 ## 📄 라이센스
 
 이 프로젝트는 개인 프로젝트입니다.
 
+---
+
+## 🤝 기여
+
+이슈나 제안사항이 있으시면 이슈를 등록해주세요.
+
+---
+
+**TermSync** - 기술 문서의 완벽한 일치를 위한 AI 솔루션
